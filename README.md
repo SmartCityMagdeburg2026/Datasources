@@ -5,7 +5,7 @@ Veranstaltungsanmeldung : https://beteiligung.sachsen-anhalt.de/portal/magdeburg
 Bitte nur öffentliche Daten/open data unter Angabe der Quelle verwenden. - Magdeburg Mietdaten: Eigene Berechnung, Datenquelle value-marktdatenbank. - Statisikdaten aus KISS-MD: https://statistik.magdeburg.de/KISS-MD/
 
 Hinweise zum Datenschutz:
-Die Verwendung von Daten im Rahmen des Smart City Hackathons ist beschränkt auf Daten, die keinen Personenbezug enthalten nach der Defintion der DSGVO (Artikel 4 DSGVO). Personenbezogene Daten sind Daten die Rückschlüsse auf eine natürliche Person zulassen oder ermöglichen.    
+Die Verwendung von Daten im Rahmen des Smart City Hackathons ist beschränkt auf Daten, die keinen Personenbezug enthalten nach der Definition der DSGVO (Artikel 4 DSGVO). Personenbezogene Daten sind Daten die Rückschlüsse auf eine natürliche Person zulassen oder ermöglichen.    
 Der Veranstalter haftet nicht für fehlende Datenschutzkonformität etwaiger Drittquellen. 
 Alle Daten aus Quellen bei denen nicht ausgeschlossen werden kann, dass ein Personenbezug hergestellt werden kann, dürfen nicht verwendet werden. Die Verwendung von personenbezogenen Daten und die Verwendung von Daten die möglicherweise Personenbezug aufweisen können, ist zu unterlassen. 
 
