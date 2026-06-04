@@ -24,7 +24,7 @@ Please use only public data/open data, citing the source. - Magdeburg rental dat
 Data Protection Notes:
 The use of data within the scope of the Smart City Hackathon is limited to data that does not contain any personal references as defined by the GDPR (Article 4 GDPR). Personal data is data that allows or enables conclusions to be drawn about an individual person.    
 The organizer is not liable for any lack of data protection compliance by third-party sources. 
-Any data from sources where it cannot be ruled out that a personal reference can be established may not be used. The use of personal data and the use of data that may potentially contain personal references is not allowed.
+Any data from sources where it cannot be ruled out that a personal reference can be established shall not be used. The use of personal data and the use of data that may potentially contain personal references is not allowed.
 
 
 The goal of the hackathon is to develop a prototype of a “Smart City” dashboard for the city of Magdeburg.
