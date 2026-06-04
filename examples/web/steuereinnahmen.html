@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Steuereinnahmen Magdeburg — Beispiel</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 820px; margin: 2rem auto; padding: 0 1rem; }
+    canvas { max-width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Gewerbesteuer Magdeburg 2010–2025</h1>
+  <canvas id="chart"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script type="module">
+    // Aus dem Datasources-Root servieren:
+    //   cd Datasources && python3 -m http.server 8000
+    //   → http://localhost:8000/examples/web/steuereinnahmen.html
+    const ds = await fetch('../../data/steuereinnahmen/json/steuereinnahmen-2010-2025.json')
+      .then(r => r.json());
+
+    const rows = [...ds.rows].sort((a, b) => a.jahr - b.jahr);
+    const labels = rows.map(r => r.jahr);
+    const values = rows.map(r => r.gewerbesteuer);
+
+    new Chart(document.getElementById('chart'), {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Gewerbesteuer (EUR)', data: values }] },
+      options: {
+        plugins: { title: { display: true, text: ds.title } },
+        scales: { y: { ticks: { callback: v => (v / 1e6).toFixed(0) + ' Mio €' } } },
+      },
+    });
+  </script>
+</body>
+</html>
