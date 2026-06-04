@@ -1,0 +1,6 @@
+# This repo is documentation-heavy. Re-include Markdown that a global/user
+# gitignore (core.excludesFile) might exclude via a generic "*.md" rule.
+!*.md
+
+# Local noise
+.DS_Store
