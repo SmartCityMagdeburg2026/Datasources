@@ -12,42 +12,53 @@ snapshot that Qdrant restores on first boot.
 ## 1. Spin it up
 
 ```bash
-git clone <repo-url>
-cd magdeburg-rag-sources
-docker compose up -d           # qdrant + ollama
+docker compose up -d
 ```
 
-Pull bge-m3 once on first start (one-time ~1.2 GB download):
+On first boot this starts Qdrant + Ollama and runs two one-shot init steps
+automatically (both idempotent — they skip themselves once done):
+
+- **qdrant-init** restores the prebuilt snapshot into the `magdeburg` collection
+  — the knowledge base is ready, **no embedding required**.
+- **ollama-init** pulls the `bge-m3` embedding model (one-time ~1.2 GB) so
+  query-time embedding works out of the box.
+
+On the very first start, wait for these to finish (the bge-m3 download dominates):
 
 ```bash
-docker exec magdeburg-ollama ollama pull bge-m3
+docker compose logs -f qdrant-init ollama-init   # Ctrl-C once both report done
 ```
 
-Plus whichever chat LLM you want to ground:
+Then pull whichever chat LLM you want to ground answers with:
 
 ```bash
 docker exec magdeburg-ollama ollama pull llama3.1:8b      # or mistral, qwen2.5, ...
 ```
 
+…or skip a local chat model entirely and use the organizer-hosted **Granite 4
+Small** endpoint for generation (see §4 and
+[deploy/README.en.md → Hosted LLM](../../deploy/README.en.md#hosted-llm-watsonx--granite-4-small)).
+
 Qdrant: <http://localhost:6333/dashboard>
 Ollama: <http://localhost:11434>
 
-## 2. Restore the snapshot
+## 2. Verify the snapshot
 
-The snapshot file lives under `./snapshots/magdeburg/magdeburg_rag_v1.snapshot`.
-Trigger restore once:
+`qdrant-init` (step 1) already restored the snapshot
+(`snapshots/magdeburg_rag_v1.snapshot`) into the `magdeburg` collection. Confirm
+it's there:
+
+```bash
+curl -s http://localhost:6333/collections/magdeburg | jq .
+# expect status: "green", points_count: ~3000
+```
+
+Only needed if you wiped the Qdrant volume and want to re-restore by hand:
 
 ```bash
 curl -X PUT 'http://localhost:6333/collections/magdeburg/snapshots/upload?priority=snapshot' \
      -H 'Content-Type:multipart/form-data' \
-     -F 'snapshot=@./snapshots/magdeburg/magdeburg_rag_v1.snapshot'
-```
-
-Sanity-check the collection:
-
-```bash
-curl -s http://localhost:6333/collections/magdeburg | jq .
-# expect status: "green", vectors_count: ~3000
+     -F 'snapshot=@snapshots/magdeburg_rag_v1.snapshot'
 ```
 
 ## 3. Query it (Python)
@@ -111,6 +122,20 @@ Antwort:"""
 print(answer("Welche Smart-City-Projekte werden in Magdeburg gefördert?"))
 ```
 
+### Alternative: hosted LLM instead of local Ollama
+
+No local chat model (or a weak machine)? Generate the answer with the
+organizer-hosted **Granite 4 Small** endpoint instead — see
+[deploy/README.en.md → Hosted LLM](../../deploy/README.en.md#hosted-llm-watsonx--granite-4-small).
+Embedding still uses local `bge-m3` + the snapshot; only the generation step
+changes: POST `${SERVER_URL}/api/llm/chat` with
+`{"messages":[{"role":"user","content": prompt}]}`.
+
+> ⚠️ That endpoint's context is only **~1024 tokens** (prompt + sources + answer
+> combined) and the token budget is shared across all teams. So for RAG: retrieve
+> **few, short** chunks (e.g. `k=2`, truncate each `payload['text']`), keep the
+> system prompt terse, and don't poll.
+
 ## 5. Metadata schema (Qdrant payload)
 
 Each chunk carries:
@@ -163,13 +188,20 @@ docker compose --profile build up --build embedder
 Re-runs are idempotent — `chunk_id` is a content hash, so unchanged sources
 don't duplicate.
 
+**Want a different embedding model?** You're not locked into `bge-m3`. Set
+`EMBED_MODEL` on the `embedder` service in `compose.yaml` and rebuild. Note the
+snapshot's vectors are tied to the model that produced them: if you change the
+model you must re-embed **and** embed your queries with that same model — so also
+update `ollama-init` to pull your model instead of `bge-m3`.
+
 ## 7. Troubleshooting
 
 | Symptom | Try |
 |---|---|
 | `curl localhost:6333/readyz` returns nothing | `docker compose ps`; restart with `docker compose restart qdrant` |
 | `ollama pull bge-m3` hangs | mirror via host: `OLLAMA_HOST=http://localhost:11434 ollama pull bge-m3` |
-| Search returns garbage | check that the snapshot was restored (`vectors_count` in `/collections/magdeburg`); re-restore from §2 |
+| Search returns garbage | check `qdrant-init` restored the snapshot (`points_count` in `/collections/magdeburg`); re-restore from §2 |
+| `qdrant-init` / `ollama-init` exited with an error | re-run just that step: `docker compose up qdrant-init` or `docker compose up ollama-init` |
 | Port conflict (11434 / 6333) | edit `compose.yaml`, change the host-side port mapping |
 | Want to use host Ollama (already running) | comment out the `ollama` service and point `OLLAMA_URL` at `host.docker.internal:11434` |
 

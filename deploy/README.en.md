@@ -39,6 +39,59 @@ For this, the GitHub repo must have:
 
 You'll get these values from the organizer team.
 
+## Hosted LLM (watsonx — Granite 4 Small)
+
+Besides a local Ollama model, the **deployed** app can use an LLM provided by the
+organizers (IBM Cloud / watsonx, **Granite 4 Small**) — ideal when a team's machine
+can't run its own chat model.
+
+Two environment variables are injected in the deployment:
+- `SERVER_URL` — backend that mediates with watsonx
+- `SERVER_TOKEN` — bearer token
+
+Chat endpoint: **POST** `${SERVER_URL}/api/llm/chat`
+
+```bash
+curl -X POST "$SERVER_URL/api/llm/chat" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $SERVER_TOKEN" \
+  -d '{"messages":[{"role":"user","content":"What is the Grüne Zitadelle?"}]}'
+# → { "response": "..." }
+```
+
+In FastAPI (e.g. in `app/main.py`):
+
+```python
+import os, httpx
+
+SERVER_URL = os.environ["SERVER_URL"]
+SERVER_TOKEN = os.environ["SERVER_TOKEN"]
+
+async def ask_llm(prompt: str, system: str | None = None) -> str:
+    messages = ([{"role": "system", "content": system}] if system else []) \
+        + [{"role": "user", "content": prompt}]
+    async with httpx.AsyncClient(timeout=60) as client:
+        r = await client.post(
+            f"{SERVER_URL}/api/llm/chat",
+            headers={"Authorization": f"Bearer {SERVER_TOKEN}",
+                     "Content-Type": "application/json"},
+            json={"messages": messages},
+        )
+        r.raise_for_status()
+        return r.json()["response"]
+```
+
+`messages[].role` can be `user`, `system` or `assistant`. Response:
+`{ "response": "..." }`.
+
+**Please note:**
+- **Shared token budget** — tokens are limited and shared across all teams. Keep
+  prompts short and avoid unnecessary calls (no polling/spamming).
+- **Small context (~1024 tokens)** — prompt **+** any RAG context **+** answer must
+  fit within ~1024 tokens together. For RAG, attach only 1–2 short chunks and keep
+  the system prompt terse.
+- **Model:** Granite 4 Small.
+
 ## Structure
 
 ```
