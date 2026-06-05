@@ -210,3 +210,7 @@ Siehe [`LICENSE`](LICENSE) für die Lizenz dieses Repositories. Mit dem Upload e
 Prototypen ins GitHub gebt ihr sie zur Nachnutzung frei. · See [`LICENSE`](LICENSE)
 for the repository licence; uploading your prototypes to GitHub releases them for
 reuse by the City of Magdeburg and others.
+
+
+## Invitation to Whatsapp Group
+![Invitation to whatsapp Group](image/whatsapp_qr_code.png)
