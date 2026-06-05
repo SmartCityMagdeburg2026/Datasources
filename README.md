@@ -214,3 +214,9 @@ reuse by the City of Magdeburg and others.
 
 ## Invitation to Whatsapp Group
 ![Invitation to whatsapp Group](image/whatsapp_qr_code.png)
+
+## Invitation to Github Group
+
+Direct link: https://ibm.biz/md-smartcity-hackathon-2026
+
+![Invitation to the Github Organization](image/github_qr_code.png)
